@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Baby Names</title>
+    <script src="js/d3/d3.js"></script>
+    <!-- <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script> -->
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <h1>Baby names</h1>
+
+    <div id="loading-mask">
+      <span>Loading ...</span>
+    </div>
+
+    <div id="year-selection-container">
+      <span>Years range</span>
+      <div>
+        <input type="range" id="input-year-range-start" value="1800" min="1800" max="2023">
+        <span id="label-year-range-start">1800</span>
+      </div>
+      <div>
+        <input type="range" id="input-year-range-end" value="2023" min="1800" max="2023">
+        <span id="label-year-range-end">2023</span>
+      </div>
+      <div>
+        <input id="input-year-check-invalid" type="checkbox" checked> <span>Include incomplete</span>
+      </div>
+
+      <button id="button-load-data">Load data</button>
+    </div>
+
+    <div id="data-overview">
+      <ul>
+        <li id="data-overview-rows-count"></li>
+        <li id="data-overview-names-count"></li>
+        <li id="data-overview-dpts-count"></li>
+      </ul>
+      <div id="data-overview-names-count"></div>
+      <div>
+        <span>Select department : </span>
+        <select id="choose-dtp-select">
+  
+        </select>
+      </div>
+    </div>
+
+    <div class="chart-div">
+      <span id="chart-dept-names-bar-dpt">---</span> <br>
+      <span id="chart-dept-names-bar-details">---</span>
+      <div id="chart-dept-names-bar">
+      </div>
+    </div>
+
+    <div class="chart-div">
+      <span id="chart-dept-names-trend-bar-dpt">---</span> <br>
+      <span id="chart-dept-names-trend-bar-details">---</span>
+      <div id="chart-dept-names-trend-bar">
+      </div>
+    </div>
+
+    
+    <div class="chart-div">
+      <div>
+        <span>Select name : </span>
+        <select id="choose-name-select">
+  
+        </select>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <script type="text/javascript" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+body {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+#loading-mask {
+  z-index: 100;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+#loading-mask > span {
+  font-size: larger;
+  font-weight: bolder;
+  color: white;
+}
+
+#data-overview {
+  border: solid 2px green;
+  padding: 0.5rem;
+  font-size: large;
+}
+
+.chart-div {
+  border: solid 2px green;
+  margin: 0.8rem;
+}
+
+#chart-dept-names-bar {
+  padding: 0.5rem;
+  width: 90vw;
+  height: 30vh;
+  font-size: large;
+}
+
+#chart-dept-names-trend-bar {
+  padding: 0.5rem;
+  width: 90vw;
+  height: 30vh;
+  font-size: large;
+}
+
+#year-selection-container {
+  border: solid 2px green;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-size: large;
+}#year-selection-container > div {
+  text-align: center;
+}
+#button-load-data {
+  cursor: pointer;
+  margin-left: auto;
+  padding: 0.5rem;
+  font-weight: bold;
+  font-size: large;
+}
+
+#map {
+  height: 800px;
+  width: 800px;
+}
