@@ -4,6 +4,7 @@ let yearEnd = 2023
 let includeInvalidYears = true
 let selectedDpt = -1
 let selectedName = ""
+let displayedNamesCount = 15
 
 function showLoadingMask(v) {
   console.log("showLoadingMask "+v)
@@ -49,6 +50,31 @@ dtpsChooseSelect.addEventListener('change', (e) => {
   display_graphs().then(() => {showLoadingMask(false)})
 })
 
+const namesCountInput = document.getElementById('choose-names-input')
+const namesCountButton = document.getElementById('choose-names-button')
+namesCountButton.addEventListener('click', () => {
+  displayedNamesCount = parseInt(namesCountInput.value)
+  showLoadingMask(true)
+  display_graphs().then(() => {showLoadingMask(false)})
+})
+
+const namesChooseSearchInput = document.getElementById('choose-name-search-input')
+namesChooseSearchInput.addEventListener('change', () => {
+  const value = namesChooseSearchInput.value + ""
+  if(value.length>=3) {
+    searched_names_list = names_list.filter(
+      (name) => name.toUpperCase().includes(value.toUpperCase())
+    )
+  }
+  else {
+    searched_names_list = names_list.filter(
+      (name) => name.length==value.length && name.toUpperCase().includes(value.toUpperCase())
+    )
+  }
+  displayNamesSelection(searched_names_list)
+  if(searched_names_list.length>0) namesChooseSelect.dispatchEvent(new Event('change'))
+})
+
 const namesChooseSelect = document.getElementById('choose-name-select')
 namesChooseSelect.addEventListener('change', () => {
   selectedName = namesChooseSelect.value
@@ -65,6 +91,10 @@ function displayDptsSelection(dpts) {
   })
 }
 function displayNamesSelection(names) {
+  // for(let i=0; i<namesChooseSelect.children.length; i++) {
+  //   namesChooseSelect.removeChild(namesChooseSelect.children.item(i))
+  // }
+  namesChooseSelect.innerHTML = ""
   names.forEach((d) => {
     const option = document.createElement('option')
     option.innerText = d
@@ -81,6 +111,13 @@ function isYearInRange(year) {
 }
 
 
+
+
+
+
+
+
+
 const SVG_GRAPH_WIDTH = 500
 const SVG_GRAPH_HEIGHT = 300
 const SVG_GRAPH_MARGIN = 50
@@ -90,6 +127,7 @@ let NAMES_DPT_COUNT = {}
 let DPT_NAMES_COUNT = {}
 let dpts_list = []
 let names_list = []
+let searched_names_list = []
 
 let ttt = 0
 
@@ -121,6 +159,9 @@ async function on_data_ready() {
   NAMES_DPT_COUNT = d.namesDptCounts
   DPT_NAMES_COUNT = d.dtpsNameCounts
 
+  dpts_list = []
+  names_list = []
+
   NAMES_DPT_COUNT.forEach((d, n) => {
     names_list.push(n)
   })
@@ -142,7 +183,6 @@ async function on_data_ready() {
 
   display_data_overview()
   displayDptsSelection(dpts_list)
-  displayNamesSelection(names_list)
 
   await display_graphs()
   await display_map()
@@ -168,10 +208,10 @@ function display_graphs() {
       console.log(selectedDpt)
 
       namesPopularityChart = display_graph_depts_names_bar_chart(
-        selectedDpt, dptNames, 15
+        selectedDpt, dptNames, displayedNamesCount
       )
       namesTrendChart = display_graph_depts_names_trend_bar_chart(
-        selectedDpt, dptNames, 15
+        selectedDpt, dptNames, displayedNamesCount
       )
 
       resolve()
@@ -206,7 +246,7 @@ function display_graph_depts_names_bar_chart(dpt, namesCountsMap, names_count) {
     else return 0
   })
 
-  items = items.slice(0, names_count)
+  items = items.slice(0, Math.min(names_count, items.length))
 
   d3.selectAll("#chart-dept-names-bar > *").remove()
   return display_graph(
@@ -231,7 +271,7 @@ function display_graph_depts_names_trend_bar_chart(dpt, namesCountsMap, names_co
     else return 0
   })
 
-  items = items.slice(0, names_count)
+  items = items.slice(0, Math.min(names_count, items.length))
 
   d3.selectAll("#chart-dept-names-trend-bar > *").remove()
   return display_graph(
@@ -261,7 +301,7 @@ function display_graph(
   svgGraphDeptNamesBar.w = svgContainer.clientWidth-svgGraphDeptNamesBar.margin*2
   svgGraphDeptNamesBar.h = svgContainer.clientHeight-svgGraphDeptNamesBar.margin*2
   svgGraphDeptNamesBar.names_count = 15
-  svgGraphDeptNamesBar.bar_width = 30
+  svgGraphDeptNamesBar.bar_width = 10
 
   svgGraphDeptNamesBar.xScale = d3.scalePoint()
 		.domain(["", ...items.map(item => item.name)])
@@ -271,7 +311,7 @@ function display_graph(
 		.range([svgGraphDeptNamesBar.h-1, 0])
 
   svgGraphDeptNamesBar.g = svgGraphDeptNamesBar.svg.append('g')
-    .attr('transform', `translate(${svgGraphDeptNamesBar.margin}, 0)`)
+    .attr('transform', `translate(${svgGraphDeptNamesBar.margin}, ${svgGraphDeptNamesBar.margin/2})`)
 
   svgGraphDeptNamesBar.g.append('g')
 		.attr('class', 'x axis')
@@ -314,6 +354,12 @@ function display_graph(
     })
   return svgGraphDeptNamesBar
 }
+
+
+
+
+
+
 
 /*
 Count the number of birth with a name in a department over the years.
@@ -388,61 +434,75 @@ function compute_name_dpt_trend(name, dpt) {
 
 
 
-
+let PATH_map
+let DEPS_map
+let WIDTH_map
+let HEIGHT_map
 function display_map() {
 
   return new Promise((resolve) => {
     setTimeout(() => {
       console.log("Display map")
-      var width = document.getElementById("map").clientWidth;
-      var height = document.getElementById("map").clientHeight;
+      WIDTH_map = document.getElementById("map").clientWidth;
+      HEIGHT_map = document.getElementById("map").clientHeight;
       
-      var path = d3.geoPath();
+      PATH_map = d3.geoPath();
       var projection = d3.geoConicConformal() // Lambert-93
         .center([2.454071, 47.279229]) // Centers the map on the center of France
-        .scale(4500)
-        .translate([width / 2, height / 2]);
+        .scale(3800)
+        .translate([WIDTH_map / 2, HEIGHT_map / 2]);
     
-      path.projection(projection); // Assign the projecttion to the path
+      PATH_map.projection(projection); // Assign the projecttion to the path
 
       d3.selectAll("#map > *").remove()
       var svg = d3.select('#map').append("svg")
-        .attr("width", width)
-        .attr("height", height);
-      var deps = svg
+        .attr("width", WIDTH_map)
+        .attr("height", HEIGHT_map);
+      DEPS_map = svg
         .append("g")
           .attr("id", "departements");
 
       if(selectedName.length==0) {
         selectedName = names_list[0]
+        displayNamesSelection([selectedName])
       }
+
+      document.getElementById('map-name-dept-name').innerText = "Postal code : "
+      document.getElementById('map-name-dept-popularity').innerText = "Popularity : "
 
       d3.json('data/departements.json')
       .then((geojson) => {
-        deps.selectAll("path")
+        DEPS_map.selectAll("path")
           .data(geojson.features)
           .enter()
           .append("path")
             .attr('class', 'departement')
-            .attr('stroke', 'black')
+            .attr('stroke', 'white')
             .attr('fill', 'gray')
-            .attr("d", path)
-        deps.selectAll("text")
+            .attr("d", PATH_map)
+            .on('click', countyClickHandler)
+            .on('mouseover', (el, d) => {
+              const dpt = parseInt(d.properties.CODE_DEPT)
+              let pop = compute_name_popularity(selectedName, dpt)
+              pop = Math.round(pop*100000)/100000
+              document.getElementById('map-name-dept-name').innerText = "Postal code : "+dpt
+              document.getElementById('map-name-dept-popularity').innerText = "Popularity : "+pop+"%"
+            })
+        DEPS_map.selectAll("text")
           .data(geojson.features)
           .enter()
           .append("text")
             .attr("x", (d) => {
-              var centroid = path.centroid(d);
+              var centroid = PATH_map.centroid(d);
               return centroid[0];
             })
             .attr("y", (d) => {
-              var centroid = path.centroid(d);
+              var centroid = PATH_map.centroid(d);
               return centroid[1];
             })
             .attr("fill", "black")
             .attr("font-weight", "bold")
-            .attr("dx", "-1rem")
-            .attr("dy", "1rem")
+            .attr("font-size", "0.75rem")
             .text((d) => {
               const dpt = parseInt(d.properties.CODE_DEPT)
               let pop = compute_name_popularity(selectedName, dpt)
@@ -459,3 +519,36 @@ function display_map() {
     })
   })
 }
+
+let centered;
+function countyClickHandler(t, d) {
+  var x, y, k
+
+  if (d && centered !== d) {
+    var centroid = PATH_map.centroid(d)
+    x = centroid[0]
+    y = centroid[1]
+    k = 5
+    centered = d
+    DEPS_map.selectAll("text")
+      .attr("font-size", "0.2rem")
+  } else {
+    x = WIDTH_map / 2
+    y = HEIGHT_map / 2
+    k = 1
+    centered = null
+    DEPS_map.selectAll("text")
+      .attr("font-size", "0.75rem")
+  }
+
+  DEPS_map.selectAll("path")
+    .classed("active", centered && function(d) { return d === centered; })
+
+  var trStr = "translate(" + WIDTH_map / 2 + "," + HEIGHT_map / 2 + ")" +
+    "scale(" + k + ")translate(" + -x + "," + -y + ")"
+
+  DEPS_map.transition()
+    .duration(1000)
+    .attr("transform", trStr)
+
+};
