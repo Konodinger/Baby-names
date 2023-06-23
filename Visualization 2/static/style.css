@@ -31,17 +31,21 @@ body {
 .chart-div {
   border: solid 2px green;
   margin: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 #chart-dept-names-bar {
-  padding: 0.5rem;
+  padding: 0rem;
   width: 90vw;
   height: 30vh;
   font-size: large;
 }
 
 #chart-dept-names-trend-bar {
-  padding: 0.5rem;
+  padding: 0rem;
   width: 90vw;
   height: 30vh;
   font-size: large;

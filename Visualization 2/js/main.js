@@ -257,7 +257,7 @@ function display_graph(
     .append('svg')
       .attr('width', svgContainer.clientWidth)
       .attr('height', svgContainer.clientHeight);
-  svgGraphDeptNamesBar.margin = svgContainer.clientWidth*0.05
+  svgGraphDeptNamesBar.margin = svgContainer.clientHeight*0.3
   svgGraphDeptNamesBar.w = svgContainer.clientWidth-svgGraphDeptNamesBar.margin*2
   svgGraphDeptNamesBar.h = svgContainer.clientHeight-svgGraphDeptNamesBar.margin*2
   svgGraphDeptNamesBar.names_count = 15
@@ -271,7 +271,7 @@ function display_graph(
 		.range([svgGraphDeptNamesBar.h-1, 0])
 
   svgGraphDeptNamesBar.g = svgGraphDeptNamesBar.svg.append('g')
-    .attr('transform', `translate(${svgGraphDeptNamesBar.margin}, ${svgGraphDeptNamesBar.margin})`)
+    .attr('transform', `translate(${svgGraphDeptNamesBar.margin}, 0)`)
 
   svgGraphDeptNamesBar.g.append('g')
 		.attr('class', 'x axis')
@@ -279,6 +279,11 @@ function display_graph(
     .style("font-size", '0.6rem')
     .style("font-weight", 'bold')
 		.call(d3.axisBottom(svgGraphDeptNamesBar.xScale))
+      .selectAll('text')
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", ".15em")
+      .attr("transform", "rotate(-65)");
   svgGraphDeptNamesBar.g.append('g')
 		.attr('class', 'y axis')
     .style("font-size", '0.6rem')
@@ -420,7 +425,7 @@ function display_map() {
           .append("path")
             .attr('class', 'departement')
             .attr('stroke', 'black')
-            .attr('fill', 'white')
+            .attr('fill', 'gray')
             .attr("d", path)
         deps.selectAll("text")
           .data(geojson.features)
@@ -435,6 +440,8 @@ function display_map() {
               return centroid[1];
             })
             .attr("fill", "black")
+            .attr("font-weight", "bold")
+            .attr("dx", "-1rem")
             .attr("dy", "1rem")
             .text((d) => {
               const dpt = parseInt(d.properties.CODE_DEPT)
